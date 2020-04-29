@@ -1,11 +1,11 @@
-##Readme
+## Readme
 This is a Python 3 fork of [https://github.com/abazad/linux_huawei_unlocker](https://github.com/abazad/linux_huawei_unlocker)
 
-#Use at your own risk
+__Use at your own risk__
 
-##Old readme
+## Old readme
 
-###Huawei Modem Unlocker
+### Huawei Modem Unlocker
 
 Copyright (C) 2012 Neil McPhail
 	<neil@themcphails.uk>
@@ -22,27 +22,27 @@ can demonstrate commitment to modernising the code.
 
 >Thank you for your interest in this software.
 
-###Licence:
+### Licence:
 
 GNU GPL version 2
 
-###Version:
+### Version:
 
 0.4
 
-###Requirements:
+### Requirements:
 
 * Linux
 * Python
 * pySerial
 
-###Usage:
+### Usage:
 
 ```
 ./unlocker.py (as root if necessary)
 ```
 
-###Warranty:
+### Warranty:
 
 none!
 
@@ -54,7 +54,7 @@ Unlocking these modems is simple but it has become the domain of malign and
 unscrupulous members of the underground warez scene. This program aims to
 simplify the process for Linux users.
 
-###Method:
+### Method:
 
 1. Insert the "foreign" SIM into your modem
 
@@ -70,7 +70,7 @@ simplify the process for Linux users.
 
 6. Let me know whether it was a success or failure!
 
-###Troubleshooting:
+### Troubleshooting:
 
 Make sure python-2 and pySerial are installed (e.g. sudo apt-get install python-serial)
 
@@ -82,6 +82,6 @@ E220 devices will not work. I do not think they will ever work with this script.
 
 Devices beginning "E3" are unlikely to work at this point. I hope to support these in a future version. If you have such a device and decide to try this script please give me feedback on the link below.
 
-###Bugs:
+### Bugs:
 
 Please raise issues at https://github.com/mcphail/linux_huawei_unlocker
