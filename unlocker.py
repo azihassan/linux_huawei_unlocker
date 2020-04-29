@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # unlocker.py
 # - Remove simlock on huawei modems
@@ -28,25 +28,25 @@ import time, serial, re, hashlib, glob
 
 # Intro
 def intro():
-	print 80 * "*"
-	print "\tHuawei modem unlocker"
-	print "\tBy Neil McPhail and dogbert"
-	print "\tThis is Free Software as defined by the GNU GENERAL PUBLIC"
-	print "\tLICENSE version 2"
-	print 80 * "*"
-	print "\tThis software comes with NO WARRANTY"
-	print "\tThis software can damage your hardware"
-	print "\tUse it at your own risk"
-	print 80 * "*"
-	print "\tNot all modems can be unlocked with this software."
-	print "\tUsers have reported problems with the following devices:"
-	print "\t\tE220, E353"
-	print "\tAttempting to unlock these devices with this software is not"
-	print "\trecommended. I hope to fix this in a later release."
-	print 80 * "*"
-	if not _requireYes():
-		print "Bye"
-		exit(0)
+	print(80 * "*")
+	print("\tHuawei modem unlocker")
+	print("\tBy Neil McPhail and dogbert")
+	print("\tThis is Free Software as defined by the GNU GENERAL PUBLIC")
+	print("\tLICENSE version 2")
+	print(80 * "*")
+	print("\tThis software comes with NO WARRANTY")
+	print("\tThis software can damage your hardware")
+	print("\tUse it at your own risk")
+	print(80 * "*")
+	print("\tNot all modems can be unlocked with this software.")
+	print("\tUsers have reported problems with the following devices:")
+	print("\t\tE220, E353")
+	print("\tAttempting to unlock these devices with this software is not")
+	print("\trecommended. I hope to fix this in a later release.")
+	print(80 * "*")
+	#if not _requireYes():
+		#print("Bye")
+		#exit(0)
 
 # Helper function
 # Require an explicit "YES" in upper case
@@ -54,13 +54,13 @@ def intro():
 # Asks for explicit uppercase "YES" if mixed or lower case used
 # Returns False for anything else
 def _requireYes():
-	print "If you wish to proceed, please type YES at the prompt"
+	print("If you wish to proceed, please type YES at the prompt")
 	while 1:
-		response = raw_input(">> ")
+		response = input(">> ")
 		if response == "YES":
 			return True
 		if response.upper() == "YES":
-			print "You must type YES in upper case to proceed"
+			print("You must type YES in upper case to proceed")
 			continue
 		else:
 			return False
@@ -69,41 +69,41 @@ def _requireYes():
 # and this seems to vary from device to device. The other 2 ports appear to
 # remain silent
 def identifyPort():
-	print "Trying to find which port is the active modem connection."
-	print "Please be patient as this can take a while.\n\n"
+	print("Trying to find which port is the active modem connection.")
+	print("Please be patient as this can take a while.\n\n")
 	for p in glob.glob('/dev/ttyUSB*'):
-		print "Testing port " + p
+		print("Testing port " + p)
 		ser = serial.Serial(port = p,
 				timeout = 15, rtscts = True, dsrdtr = True)
-		ser.write('AT\r\n')
+		ser.write('AT\r\n'.encode())
 		activity = ser.read(5)
 		if activity == '':
-			print "\tNo activity\n"
+			print("\tNo activity\n")
 			ser.close()
 			continue
 
-		print "\tActivity detected\n"
+		print("\tActivity detected\n")
 		ser.close()
 		return p
 	return ''
 
 # The modem should respond with the IMEI with the AT+CGSN command
 def obtainImei(port):
-	print "\nTrying to obtain IMEI."
-	print "The modem will be given 5 seconds to respond."
+	print("\nTrying to obtain IMEI.")
+	print("The modem will be given 5 seconds to respond.")
 	ser = serial.Serial(port = port,
 			timeout = 0, rtscts = True, dsrdtr = True)
 	ser.flushInput()
-	ser.write('AT+CGSN\r\n')
+	ser.write('AT+CGSN\r\n'.encode())
 	time.sleep(5)
-	response = ser.read(4096)
+	response = ser.read(4096).decode('utf-8')
 	ser.close()
 	match = re.search('\r\n(\d{15})\r\n', response)
 	if match:
-		print "Found probable IMEI: " + match.group(1)
+		print("Found probable IMEI: " + match.group(1))
 		return match.group(1)
 	else:
-		print "IMEI not found"
+		print("IMEI not found")
 		return ''
 
 # Check the IMEI is correct
@@ -128,13 +128,13 @@ def testImeiChecksum(imei):
 # modem
 def checkImeiCompatibility(imei):
 	if ('8' == imei[0]):
-		print 80 * "*"
-		print "\n\tWarning"
-		print "\n\tYour modem's IMEI begins with '8'"
-		print "\tIt is likely to be incompatible with this script"
-		print "\tProceed at your own risk"
-		print "\n\tPlease provide feedback: see README and HELPME\n"
-		print 80 * "*"
+		print(80 * "*")
+		print("\n\tWarning")
+		print("\n\tYour modem's IMEI begins with '8'")
+		print("\tIt is likely to be incompatible with this script")
+		print("\tProceed at your own risk")
+		print("\n\tPlease provide feedback: see README and HELPME\n")
+		print(80 * "*")
 
 # Interrogate the lock status
 # Returns a dictionary with the lock status, remaining unlock attempts
@@ -146,14 +146,14 @@ def checkImeiCompatibility(imei):
 #            3 = locked and cannot be unlocked
 def checkLockStatus(port):
 	status = {'lockStatus': 0, 'remaining': 0, 'carrier': 0}
-	print "\nChecking the lock status of the SIM."
-	print "The modem will be given 5 seconds to respond."
+	print("\nChecking the lock status of the SIM.")
+	print("The modem will be given 5 seconds to respond.")
 	ser = serial.Serial(port = port,
 			timeout = 0, rtscts = True, dsrdtr = True)
 	ser.flushInput()
-	ser.write('AT^CARDLOCK?\r\n')
+	ser.write('AT^CARDLOCK?\r\n'.encode())
 	time.sleep(5)
-	response = ser.read(4096)
+	response = ser.read(4096).decode('utf-8')
 	ser.close()
 
 	match = re.search('CARDLOCK: (\d),(\d\d?),(\d+)\r', response)
@@ -167,10 +167,10 @@ def checkLockStatus(port):
 # Adapted from dogbert's original
 def computeUnlockCode(imei):
 	salt = '5e8dd316726b0335'
-	digest = hashlib.md5((imei+salt).lower()).digest()
+	digest = hashlib.md5((imei.encode()+salt.encode()).lower()).digest()
 	code = 0
 	for i in range(0,4):
-		code += (ord(digest[i])^ord(digest[4+i])^ord(digest[8+i])^ord(digest[12+i])) << (3-i)*8
+		code += (digest[i]^digest[4+i]^digest[8+i]^digest[12+i]) << (3-i)*8
 	code &= 0x1ffffff
 	code |= 0x2000000
 	return code
@@ -179,7 +179,7 @@ def computeUnlockCode(imei):
 def unlockModem(port, lockCode):
 	ser = serial.Serial(port = port, rtscts = True, dsrdtr = True)
 	command = 'AT^CARDLOCK="'+ str(lockCode) + '"\r\n'
-	ser.write(command)
+	ser.write(command.encode())
 	ser.close()
 #
 # Main routine
@@ -189,100 +189,103 @@ def main():
 	# Work out which is the control port
 	try:
 		activePort = identifyPort()
-	except:
-		print "\nAn error occurred when probing for active ports."
-		print "This may be because you need to run this program as root."
+	except Exception as e:
+		print("\nAn error occurred when probing for active ports.")
+		print("This may be because you need to run this program as root.")
+		print(str(e))
 		exit(1)
 	else:
 		if (activePort==''):
-			print "\nCould not identify active port."
+			print("\nCould not identify active port.")
 			exit(1)
 
 	# Obtain and check IMEI
 	try:
 		imei = obtainImei(activePort)
-	except:
-		print "\nAn error occurred when trying to check the IMEI."
+	except Exception as e:
+		print("\nAn error occurred when trying to check the IMEI.")
+		print(str(e))
 		exit(1)
 	else:
 		if (imei==''):
-			print "\nCould not obtain IMEI."
-			print "Check the modem is properly inserted"
-			print "Check a SIM card is in place"
-			print "Check you are not already connected"
-			print "Try removing and reinserting the device"
+			print("\nCould not obtain IMEI.")
+			print("Check the modem is properly inserted")
+			print("Check a SIM card is in place")
+			print("Check you are not already connected")
+			print("Try removing and reinserting the device")
 			exit(1)
 		else:
 			if not testImeiChecksum(imei):
-				print "\nIMEI checksum invalid."
+				print("\nIMEI checksum invalid.")
 				exit(1)
 			else:
-				print "IMEI checksum OK."
+				print("IMEI checksum OK.")
 				checkImeiCompatibility(imei)
 
 	# Obtain lockstatus
 	try:
 		lockInfo = checkLockStatus(activePort)
-	except:
-		print "\nAn error occurred when trying to check the SIM lock."
+	except Exception as e:
+		print("\nAn error occurred when trying to check the SIM lock.")
+		print(str(e))
 		exit(1)
 	else:
 		ls = lockInfo['lockStatus']
 		if ls == 0:
-			print "\nCouldn't obtain SIM lock status."
-			print "Further operations would be dangerous."
+			print("\nCouldn't obtain SIM lock status.")
+			print("Further operations would be dangerous.")
 			exit(1)
 		elif ls == 2:
-			print "\nThe modem is already unlocked for this SIM."
+			print("\nThe modem is already unlocked for this SIM.")
 			exit(0)
 		elif ls == 3:
-			print "\nThe modem is hard locked,"
-			print "This program cannot help you."
+			print("\nThe modem is hard locked,")
+			print("This program cannot help you.")
 			exit(1)
 		else:
-			print "\nThis SIM should be unlockable..."
-			print "Remaining attempts: ", lockInfo['remaining']
-			print "Exceeding this will hard-lock the modem"
+			print("\nThis SIM should be unlockable...")
+			print("Remaining attempts: ", lockInfo['remaining'])
+			print("Exceeding this will hard-lock the modem")
 
 	unlockCode = computeUnlockCode(imei)
-	print "\nUnlock code = ", unlockCode
-	print "Please be aware that a failed unlocking attempt could break your modem."
-	print "This is a risky procedure."
+	print("\nUnlock code = ", unlockCode)
+	print("Please be aware that a failed unlocking attempt could break your modem.")
+	print("This is a risky procedure.")
 	if not _requireYes():
-		print "Unlocking aborted"
+		print("Unlocking aborted")
 		exit(0)
 
-	print "\nAttempting to unlock..."
+	print("\nAttempting to unlock...")
 	try:
 		unlockModem(activePort, unlockCode)
 	except:
-		print "\nAn error occurred when trying to unlock the modem."
+		print("\nAn error occurred when trying to unlock the modem.")
 		exit(1)
 
-	print "\nWill check result in 5 seconds."
+	print("\nWill check result in 5 seconds.")
 	time.sleep(5)
 
 	# Check result
 	try:
 		lockInfo = checkLockStatus(activePort)
 	except:
-		print "\nAn error occurred when trying to check the SIM lock."
+		print("\nAn error occurred when trying to check the SIM lock.")
 		exit(1)
 	else:
 		ls = lockInfo['lockStatus']
 		if ls == 0:
-			print "\nCouldn't obtain SIM lock status."
-			print "Further operations would be dangerous."
+			print("\nCouldn't obtain SIM lock status.")
+			print("Further operations would be dangerous.")
 			exit(1)
 		elif ls == 1:
-			print "\nUnlocking unsuccessful. Sorry."
+			print("\nUnlocking unsuccessful. Sorry.")
 			exit(1)
 		elif ls == 3:
-			print "\nUnlocking unsuccessful."
-			print "The modem appears to have been hard locked. Sorry."
+			print("\nUnlocking unsuccessful.")
+			print("The modem appears to have been hard locked. Sorry.")
 			exit(1)
 		else:
-			print "\nUnlocking successful!"
+			print("\nUnlocking successful!")
 
 if __name__ == "__main__":
 	main()
